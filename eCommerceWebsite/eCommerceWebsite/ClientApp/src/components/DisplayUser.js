@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-export class DisplayItem extends Component {
-    static displayName = DisplayItem.name;
+export class DisplayUser extends Component {
+    static displayName = DisplayUser.name;
 
     constructor(props) {
         super(props);

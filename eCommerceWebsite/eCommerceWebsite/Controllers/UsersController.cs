@@ -1,6 +1,7 @@
 ﻿using eCommerceWebsite.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Data.SqlClient;
 
 namespace eCommerceWebsite.Controllers
@@ -9,20 +10,21 @@ namespace eCommerceWebsite.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly ItemDBContext itemDBContext;
 
-        public UsersController(IConfiguration configuration)
+        public UsersController(ItemDBContext itemDBContext)
         {
+            this.itemDBContext = itemDBContext;
         }
 
-        [HttpPost]
-        [Route("registration")]
-        public Response register(Users users)
+        [HttpGet]
+        [Route("GetUser")]
+        public async Task<IEnumerable<Users>> GetUsers()
         {
-            Response response = new Response();
-            SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("Ecommerce").ToString());
-            return response;
+            return await itemDBContext.Users.ToListAsync();
         }
 
     }
+
+
 }

@@ -41,6 +41,9 @@ export class NavMenu extends Component {
               <NavItem>
                 <NavLink tag={Link} className="text-dark" to="/display-item">Display Item</NavLink>
               </NavItem>
+              <NavItem>
+                <NavLink tag={Link} className="text-dark" to="/display-user">Display User</NavLink>
+              </NavItem>
 
             </ul>
           </Collapse>
