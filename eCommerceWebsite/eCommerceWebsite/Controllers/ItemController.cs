@@ -55,10 +55,6 @@ namespace eCommerceWebsite.Controllers
                 itemDBContext.SaveChanges();
 
             }
-            else
-            {
-                isDeleted = false;
-            }
             return isDeleted;
         }
 

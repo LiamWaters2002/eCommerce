@@ -2,6 +2,7 @@ import { Counter } from "./components/Counter";
 import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
 import { DisplayItem } from "./components/DisplayItem";
+import { DisplayUser } from "./components/DisplayUser";
 
 const AppRoutes = [
   {
@@ -19,6 +20,10 @@ const AppRoutes = [
     {
         path: '/display-item',
         element: <DisplayItem />
+    },
+    {
+        path: '/display-user',
+        element: <DisplayUser />
     }
 ];
 

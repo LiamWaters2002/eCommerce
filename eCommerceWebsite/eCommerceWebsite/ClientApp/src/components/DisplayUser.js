@@ -7,197 +7,172 @@ export class DisplayUser extends Component {
         super(props);
         this.state = {
             loading: true,
-            items: [], 
-            selectedItem: null,
-            editedItem: null, // Store the currently edited item
+            users: [],
+            selectedUser: null,
+            editedUser: null, // Store the currently edited user
             showForm: false,
-            editItemMode: false,
-            newItemName: '',
-            newItemManufacturer: '',
-            newItemUnitPrice: '',
-            newItemDiscount: '',
-            newItemQuantity: '',
-            newItemDescription: '',
-            newItemImageURL: '',
-            newItemStatus: '',
+            editUserMode: false,
+            newFirstName: '',
+            newLastName: '',
+            newEmail: '',
+            newPassword: '',
+            newFund: 0,
+            newType: '',
+            newUserStatus: 1,
         };
     }
 
-
-    //Run when the component is mounted onto dom.
     componentDidMount() {
-        this.fetchItems();
+        this.fetchUsers();
     }
 
-    async fetchItems() {
+    async fetchUsers() {
         try {
-            const response = await fetch('https://localhost:7195/api/Item/GetItem'); // Replace with your API URL
+            const response = await fetch('https://localhost:7195/api/Users/GetUser'); // Replace with your API URL
             if (response.ok) {
                 const data = await response.json();
-                this.setState({ items: data, loading: false });
+                console.log('Fetched users:', data); // Print the user data to the console
+                this.setState({ users: data, loading: false });
             } else {
-                // Handle error here
-                console.error('Failed to fetch items.');
+                console.error('Failed to fetch users.');
             }
         } catch (error) {
-            console.error('An error occurred while fetching items:', error);
+            console.error('An error occurred while fetching users:', error);
         }
     }
 
-    async addItem(itemData) {
+    async addUser(userData) {
         try {
-            const response = await fetch('https://localhost:7195/api/Item/AddItem', {
+            const response = await fetch('https://localhost:7195/api/Users/AddUser', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(itemData),
+                body: JSON.stringify(userData),
             });
 
             if (response.ok) {
-                // Item added successfully, you can handle this as needed
-                // You may want to refresh the item list after adding
-                this.fetchItems();
+                this.fetchUsers();
             } else {
-                // Handle error here
-                console.error('Failed to add item.');
+                console.error('Failed to add user.');
             }
         } catch (error) {
-            console.error('An error occurred while adding the item:', error);
+            console.error('An error occurred while adding the user:', error);
         }
     }
 
-    async updateItem(itemId, updatedItemData) {
+    async updateUser(userId, updatedUserData) {
         try {
-            const response = await fetch(`https://localhost:7195/api/Item/UpdateItem/${itemId}`, {
+            const response = await fetch(`https://localhost:7195/api/Users/UpdateUser/${userId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(updatedItemData),
+                body: JSON.stringify(updatedUserData),
             });
 
             if (response.ok) {
-                // Item updated successfully, you can handle this as needed
-                // You may want to refresh the item list after updating
-                this.fetchItems();
+                this.fetchUsers();
             } else {
-                // Handle error here
-                console.error('Failed to update item.');
+                console.error('Failed to update user.');
             }
         } catch (error) {
-            console.error('An error occurred while updating the item:', error);
+            console.error('An error occurred while updating the user:', error);
         }
     }
 
-    deleteItem = async () => {
+    deleteUser = async () => {
+        const { selectedUser } = this.state;
 
-        const { selectedItem } = this.state;
-
-        if (!selectedItem) {
-            console.error('No item selected for deletion.');
+        if (!selectedUser) {
+            console.error('No user selected for deletion.');
             return;
         }
         try {
-            const response = await fetch(`https://localhost:7195/api/Item/DeleteItem/${selectedItem.id}`, {
+            const response = await fetch(`https://localhost:7195/api/Users/DeleteUser/${selectedUser.ID}`, {
                 method: 'DELETE',
             });
 
             if (response.ok) {
-                // Item deleted successfully, you can handle this as needed
-                // You may want to refresh the item list after deleting
-                this.fetchItems();
-                this.setState({ selectedItem: null });
+                this.fetchUsers();
+                this.setState({ selectedUser: null });
             } else {
-                // Handle error here
-                console.error('Failed to delete item.');
+                console.error('Failed to delete user.');
             }
         } catch (error) {
-            console.error('An error occurred while deleting the item:', error);
+            console.error('An error occurred while deleting the user:', error);
         }
     }
 
-    handleRadioChange = (event, selectedItem) => {
+    handleRadioChange = (event, selectedUser) => {
         this.setState((prevState) => {
-            // If the same radio button is clicked again, deselect it
-            if (prevState.selectedItem === selectedItem) {
-                console.log('Deselecting radio button');
-                return { selectedItem: null, editedItem: null };
+            if (prevState.selectedUser === selectedUser) {
+                return { selectedUser: null, editedUser: null };
             }
-            console.log('Selecting radio button');
-            return { selectedItem, editedItem: selectedItem };
+            return { selectedUser, editedUser: selectedUser };
         });
     };
 
     handleInputChange = (event, field) => {
-        const { editedItem } = this.state;
-        const updatedItem = { ...editedItem, [field]: event.target.value };
-        this.setState({ editedItem: updatedItem });
+        const { editedUser } = this.state;
+        const updatedUser = { ...editedUser, [field]: event.target.value };
+        this.setState({ editedUser: updatedUser });
     };
 
-    handleNewItemChange = (field) => (event) => {
+    handleNewUserChange = (field) => (event) => {
         this.setState({ [field]: event.target.value });
     };
 
     handleSubmit = async (event) => {
         event.preventDefault();
 
-        const newItemData = {
-            name: this.state.newItemName,
-            manufacturer: this.state.newItemManufacturer,
-            unitPrice: parseFloat(this.state.newItemUnitPrice), // Assuming unitPrice is a number
-            discount: parseFloat(this.state.newItemDiscount), // Assuming discount is a number
-            quantity: parseInt(this.state.newItemQuantity), // Assuming quantity is an integer
-            description: this.state.newItemDescription,
-            imageURL: this.state.newItemImageURL,
-            status: this.state.newItemStatus,
+        const newUserData = {
+            FirstName: this.state.newFirstName,
+            LastName: this.state.newLastName,
+            Email: this.state.newEmail,
+            Password: this.state.newPassword,
+            Fund: parseFloat(this.state.newFund),
+            Type: this.state.newType,
+            Status: parseInt(this.state.newUserStatus),
+            Createdon: new Date().toISOString(),
         };
 
-        // Send a POST request to add the item
-        await this.addItem(newItemData);
+        await this.addUser(newUserData);
 
-        // Clear the form fields
         this.setState({
-            newItemName: '',
-            newItemManufacturer: '',
-            newItemUnitPrice: '',
-            newItemDiscount: '',
-            newItemQuantity: '',
-            newItemDescription: '',
-            newItemImageURL: '',
-            newItemStatus: '',
+            newFirstName: '',
+            newLastName: '',
+            newEmail: '',
+            newPassword: '',
+            newFund: 0,
+            newType: '',
+            newUserStatus: 1,
+            newCreatedon: ''
         });
     };
 
-
     toggleEdit = () => {
-        //const { selectedItem, editedItem } = this.state;
-        //if (selectedItem) {
-        //    this.setState({ editedItem: editedItem === selectedItem ? null : selectedItem });
-        //}
         this.setState((prevState) => ({
-            editItemMode: true,
-            showForm: false, 
+            editUserMode: true,
+            showForm: false,
         }));
     };
 
     toggleForm = () => {
         this.setState((prevState) => ({
-            
             showForm: true,
-            editItemMode: false,
+            editUserMode: false,
         }));
     };
 
-    saveItemChanges = () => {
-        const { editedItem } = this.state;
-        this.updateItem(editedItem.id, editedItem);
-        this.setState({ editedItem: null });
+    saveUserChanges = () => {
+        const { editedUser } = this.state;
+        this.updateUser(editedUser.ID, editedUser);
+        this.setState({ editedUser: null });
     };
 
-
-    editItem(item) {
-        this.setState({ editedItem: item });
+    editUser(user) {
+        this.setState({ editedUser: user });
     }
 
     render() {
@@ -206,204 +181,183 @@ export class DisplayUser extends Component {
         if (this.state.loading) {
             contents = <p><em>Loading...</em></p>;
         } else {
-            contents = this.renderItemsTable(this.state.items);
+            contents = this.renderUsersTable(this.state.users);
         }
 
-        let formOrEditItem;
-
+        let formOrEditUser;
 
         if (this.state.showForm) {
-            formOrEditItem = (
+            formOrEditUser = (
                 <form onSubmit={this.handleSubmit}>
-                    <h2>Add New Item</h2>
+                    <h2>Add New User</h2>
                     <div className="form-group">
-                        <label htmlFor="newName">Name:</label>
+                        <label htmlFor="newFirstName">First Name:</label>
                         <input
                             type="text"
-                            id="newName"
-                            value={this.state.newItemName}
-                            onChange={this.handleNewItemChange('newItemName')}
+                            id="newFirstName"
+                            value={this.state.newFirstName}
+                            onChange={this.handleNewUserChange('newFirstName')}
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="newManufacturer">Manufacturer:</label>
+                        <label htmlFor="newLastName">Last Name:</label>
                         <input
                             type="text"
-                            id="newManufacturer"
-                            value={this.state.newItemManufacturer}
-                            onChange={this.handleNewItemChange('newItemManufacturer')}
+                            id="newLastName"
+                            value={this.state.newLastName}
+                            onChange={this.handleNewUserChange('newLastName')}
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="newUnitPrice">Unit Price:</label>
+                        <label htmlFor="newEmail">Email:</label>
                         <input
                             type="text"
-                            id="newUnitPrice"
-                            value={this.state.newItemUnitPrice}
-                            onChange={this.handleNewItemChange('newItemUnitPrice')}
+                            id="newEmail"
+                            value={this.state.newEmail}
+                            onChange={this.handleNewUserChange('newEmail')}
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="newDiscount">Discount:</label>
+                        <label htmlFor="newPassword">Password:</label>
                         <input
-                            type="text"
-                            id="newDiscount"
-                            value={this.state.newItemDiscount}
-                            onChange={this.handleNewItemChange('newItemDiscount')}
+                            type="password"
+                            id="newPassword"
+                            value={this.state.newPassword}
+                            onChange={this.handleNewUserChange('newPassword')}
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="newQuantity">Quantity:</label>
+                        <label htmlFor="newFund">Fund:</label>
                         <input
                             type="text"
-                            id="newQuantity"
-                            value={this.state.newItemQuantity}
-                            onChange={this.handleNewItemChange('newItemQuantity')}
+                            id="newFund"
+                            value={this.state.newFund}
+                            onChange={this.handleNewUserChange('newFund')}
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="newDescription">Description:</label>
+                        <label htmlFor="newType">Type:</label>
                         <input
                             type="text"
-                            id="newDescription"
-                            value={this.state.newItemDescription}
-                            onChange={this.handleNewItemChange('newItemDescription')}
+                            id="newType"
+                            value={this.state.newType}
+                            onChange={this.handleNewUserChange('newType')}
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="newImageURL">Image URL:</label>
+                        <label htmlFor="newUserStatus">Status:</label>
                         <input
                             type="text"
-                            id="newImageURL"
-                            value={this.state.newItemImageURL}
-                            onChange={this.handleNewItemChange('newItemImageURL')}
+                            id="newUserStatus"
+                            value={this.state.newUserStatus}
+                            onChange={this.handleNewUserChange('newUserStatus')}
                         />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="newStatus">Status:</label>
-                        <input
-                            type="text"
-                            id="newStatus"
-                            value={this.state.newItemStatus}
-                            onChange={this.handleNewItemChange('newItemStatus')}
-                        />
-                    </div>
-                    <button type="submit">Add Item</button>
+                    <button type="submit">Add User</button>
                 </form>
             );
-        } else if (this.state.editedItem) {
-            let editedItem = this.state.editedItem;
-            formOrEditItem = (
-                    <div>
-                        <h2>Edit Item</h2>
-                        <div className="form-group">
-                            <label htmlFor="name">Name:</label>
-                            <input
-                                type="text"
-                                id="name"
-                                value={editedItem.name}
-                                onChange={(event) => this.handleInputChange(event, 'name')}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="manufacturer">Manufacturer:</label>
-                            <input
-                                type="text"
-                                id="manufacturer"
-                                value={editedItem.manufacturer}
-                                onChange={(event) => this.handleInputChange(event, 'manufacturer')}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="unitPrice">Unit Price:</label>
-                            <input
-                                type="text"
-                                id="unitPrice"
-                                value={editedItem.unitPrice}
-                                onChange={(event) => this.handleInputChange(event, 'unitPrice')}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="discount">Discount:</label>
-                            <input
-                                type="text"
-                                id="discount"
-                                value={editedItem.discount}
-                                onChange={(event) => this.handleInputChange(event, 'discount')}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="quantity">Quantity:</label>
-                            <input
-                                type="text"
-                                id="quantity"
-                                value={editedItem.quantity}
-                                onChange={(event) => this.handleInputChange(event, 'quantity')}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="description">Description:</label>
-                            <input
-                                type="text"
-                                id="description"
-                                value={editedItem.description}
-                                onChange={(event) => this.handleInputChange(event, 'description')}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="imageURL">Image URL:</label>
-                            <input
-                                type="text"
-                                id="imageURL"
-                                value={editedItem.imageURL}
-                                onChange={(event) => this.handleInputChange(event, 'imageURL')}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="status">Status:</label>
-                            <input
-                                type="text"
-                                id="status"
-                                value={editedItem.status}
-                                onChange={(event) => this.handleInputChange(event, 'status')}
-                            />
-                        </div>
-                        <button onClick={this.saveItemChanges}>Save</button>
+        } else if (this.state.editedUser) {
+            let editedUser = this.state.editedUser;
+            formOrEditUser = (
+                <div>
+                    <h2>Edit User</h2>
+                    <div className="form-group">
+                        <label htmlFor="firstName">First Name:</label>
+                        <input
+                            type="text"
+                            id="firstName"
+                            value={editedUser.FirstName}
+                            onChange={(event) => this.handleInputChange(event, 'FirstName')}
+                        />
                     </div>
+                    <div className="form-group">
+                        <label htmlFor="lastName">Last Name:</label>
+                        <input
+                            type="text"
+                            id="lastName"
+                            value={editedUser.LastName}
+                            onChange={(event) => this.handleInputChange(event, 'LastName')}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="email">Email:</label>
+                        <input
+                            type="text"
+                            id="email"
+                            value={editedUser.Email}
+                            onChange={(event) => this.handleInputChange(event, 'Email')}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="password">Password:</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={editedUser.Password}
+                            onChange={(event) => this.handleInputChange(event, 'Password')}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="fund">Fund:</label>
+                        <input
+                            type="text"
+                            id="fund"
+                            value={editedUser.Fund}
+                            onChange={(event) => this.handleInputChange(event, 'Fund')}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="type">Type:</label>
+                        <input
+                            type="text"
+                            id="type"
+                            value={editedUser.Type}
+                            onChange={(event) => this.handleInputChange(event, 'Type')}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="userStatus">Status:</label>
+                        <input
+                            type="text"
+                            id="userStatus"
+                            value={editedUser.Status}
+                            onChange={(event) => this.handleInputChange(event, 'Status')}
+                        />
+                    </div>
+                    <button onClick={this.saveUserChanges}>Save</button>
+                </div>
             );
         }
 
         return (
             <div>
-                <h1 id="tableLabel">Items</h1>
+                <h1 id="tableLabel">Users</h1>
                 <p>This component demonstrates fetching data from the server.</p>
                 {contents}
 
-
-
                 <button onClick={this.toggleForm}>
-                    {this.state.showForm ? <b>Add A New Item</b> : 'Add A New Item'}
+                    {this.state.showForm ? <b>Add A New User</b> : 'Add A New User'}
                 </button>
 
-                <button onClick={this.toggleEdit} disabled={!this.state.selectedItem}>
-                    {this.state.selectedItem ? (
-                        this.state.editItemMode ? <b>Edit Selected Item</b> : 'Edit Selected Item'
+                <button onClick={this.toggleEdit} disabled={!this.state.selectedUser}>
+                    {this.state.selectedUser ? (
+                        this.state.editUserMode ? <b>Edit Selected User</b> : 'Edit Selected User'
                     ) : (
-                            'Edit Selected Item'
+                        'Edit Selected User'
                     )}
                 </button>
 
-                <button onClick={this.deleteItem} disabled={!this.state.selectedItem}>
-                    Delete Selected Item
+                <button onClick={this.deleteUser} disabled={!this.state.selectedUser}>
+                    Delete Selected User
                 </button>
 
-                {formOrEditItem}
+                {formOrEditUser}
             </div>
         );
     }
 
-    renderItemsTable(items) {
-        const { selectedItem, editedItem } = this.state;
+    renderUsersTable(users) {
+        const { selectedUser, editedUser } = this.state;
 
         return (
             <div>
@@ -412,42 +366,36 @@ export class DisplayUser extends Component {
                         <tr>
                             <th>Select</th>
                             <th>ID</th>
-                            <th>Name</th>
-                            <th>Manufacturer</th>
-                            <th>Unit Price</th>
-                            <th>Discount</th>
-                            <th>Quantity</th>
-                            <th>Description</th>
-                            <th>Image URL</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Password</th>
+                            <th>Fund</th>
+                            <th>Type</th>
                             <th>Status</th>
+                            <th>CreatedOn</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {items.map(item =>
-                            <tr key={item.id}>
+                        {users.map(user =>
+                            <tr key={user.id}>
                                 <td>
                                     <input
                                         type="radio"
-                                        name={`itemRadio_${item.id}`}
-                                        onChange={(event) => this.handleRadioChange(event, item)}
-                                        checked={selectedItem && selectedItem.id === item.id}
+                                        name={`userRadio_${user.id}`}
+                                        onChange={(event) => this.handleRadioChange(event, user)}
+                                        checked={selectedUser && selectedUser.id === user.id}
                                     />
                                 </td>
-                                <td>{item.id}</td>
-                                <td>{item.name}</td>
-                                <td>{item.manufacturer}</td>
-                                <td>{item.unitPrice}</td>
-                                <td>{item.discount}</td>
-                                <td>{item.quantity}</td>
-                                <td>{item.description}</td>
-                                <td>
-                                    <img
-                                        src={item.imageURL}
-                                        alt={item.name}
-                                        style={{ maxWidth: '100px' }} // Adjust the image size as needed
-                                    />
-                                </td>
-                                <td>{item.status}</td>
+                                <td>{user.id}</td>
+                                <td>{user.firstName}</td>
+                                <td>{user.lastName}</td>
+                                <td>{user.email}</td>
+                                <td>{user.password}</td>
+                                <td>{user.fund}</td>
+                                <td>{user.type}</td>
+                                <td>{user.status}</td>
+                                <td>{user.createdon}</td>
                             </tr>
                         )}
                     </tbody>

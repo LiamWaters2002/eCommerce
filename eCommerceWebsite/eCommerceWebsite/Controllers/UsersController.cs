@@ -24,7 +24,37 @@ namespace eCommerceWebsite.Controllers
             return await itemDBContext.Users.ToListAsync();
         }
 
+        [HttpPost]
+        [Route("AddUser")]
+        public async Task<Users> AddUser(Users user)
+        {
+            itemDBContext.Users.Add(user);
+            await itemDBContext.SaveChangesAsync();
+            return user;
+        }
+
+        [HttpPatch]
+        [Route("UpdateUser/{id}")]
+        public async Task<Users> UpdateUser(int id, Users user)
+        {
+            itemDBContext.Entry(user).State = EntityState.Modified;
+            await itemDBContext.SaveChangesAsync();
+            return user;
+        }
+
+        [HttpDelete]
+        [Route("DeleteUser/{id}")]
+        public async Task<bool> DeleteUser(int id)
+        {
+            var user = await itemDBContext.Users.FindAsync(id);
+            if (user != null)
+            {
+                itemDBContext.Users.Remove(user);
+                await itemDBContext.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
+        }
     }
-
-
 }
