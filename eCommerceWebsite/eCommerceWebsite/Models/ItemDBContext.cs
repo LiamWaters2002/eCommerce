@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace eCommerceWebsite.Models
 {
-    public class ItemDBContext : DbContext
+    public class ItemDBContext : IdentityDbContext<IdentityUser>
     {
         public ItemDBContext(DbContextOptions<ItemDBContext> options) : base(options)
         {

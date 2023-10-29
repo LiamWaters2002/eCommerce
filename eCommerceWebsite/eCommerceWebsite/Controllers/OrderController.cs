@@ -1,0 +1,59 @@
+﻿using eCommerceWebsite.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace eCommerceWebsite.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class OrderController : ControllerBase
+    {
+        private readonly ItemDBContext itemDBContext;
+
+        public OrderController(ItemDBContext itemDBContext)
+        {
+            this.itemDBContext = itemDBContext;
+        }
+
+        [HttpGet]
+        [Route("GetOrders")]
+        public async Task<IEnumerable<Items>> GetOrders()
+        {
+            return await itemDBContext.Items.ToListAsync();
+        }
+
+        [HttpPost]
+        [Route("PlaceOrder")]
+        public async Task<Items> PlaceOrder(Items item)
+        {
+            itemDBContext.Items.Add(item);
+            await itemDBContext.SaveChangesAsync();
+            return item;
+        }
+
+        [HttpPatch]
+        [Route("UpdateOrder/{id}")]
+        public async Task<Items> UpdateOrder(Items item)
+        {
+            itemDBContext.Entry(item).State = EntityState.Modified;
+            await itemDBContext.SaveChangesAsync();
+            return item;
+        }
+
+        [HttpDelete]
+        [Route("CancelOrder/{id}")]
+        public bool CancelOrder(int id)
+        {
+            bool isCanceled = false;
+            var item = itemDBContext.Items.Find(id);
+            if (item != null)
+            {
+                isCanceled = true;
+                itemDBContext.Entry(item).State = EntityState.Deleted;
+                itemDBContext.SaveChanges();
+            }
+            return isCanceled;
+        }
+    }
+}
