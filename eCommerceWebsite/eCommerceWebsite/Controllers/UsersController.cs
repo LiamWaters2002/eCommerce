@@ -27,16 +27,16 @@ namespace eCommerceWebsite.Controllers
 
         [HttpGet]
         [Route("GetUser")]
-        public async Task<IEnumerable<Users>> GetUsers()
+        public async Task<IEnumerable<IdentityUser>> GetUsers()
         {
-            return await itemDBContext.Users.ToListAsync();
+            return await itemDBContext.AspNetUsers.ToListAsync();
         }
 
         [HttpPost]
         [Route("AddUser")]
         public async Task<Users> AddUser(Users user)
         {
-            itemDBContext.Users.Add(user);
+            itemDBContext.AspNetUsers.Add(user);
             await itemDBContext.SaveChangesAsync();
             return user;
         }
@@ -54,10 +54,10 @@ namespace eCommerceWebsite.Controllers
         [Route("DeleteUser/{id}")]
         public async Task<bool> DeleteUser(int id)
         {
-            var user = await itemDBContext.Users.FindAsync(id);
+            var user = await itemDBContext.AspNetUsers.FindAsync(id);
             if (user != null)
             {
-                itemDBContext.Users.Remove(user);
+                itemDBContext.AspNetUsers.Remove(user);
                 await itemDBContext.SaveChangesAsync();
                 return true;
             }
@@ -69,37 +69,33 @@ namespace eCommerceWebsite.Controllers
         [Route("Registration")]
         public async Task<String> Registration(Users user)
         {
-            var existingUser = await itemDBContext.Users.FirstOrDefaultAsync(u => u.Email == user.Email); // Retrieve first user with that email, or return null if not in db.
+            var existingUser = await itemDBContext.AspNetUsers.FirstOrDefaultAsync(u => u.Email == user.Email); // Retrieve first user with that email, or return null if not in db.
 
             if (existingUser != null)
             {
                 return "Email is already registered.";
             }
 
-            //Registration server-side default values...
-            user.Createdon = DateTime.Now;
-            user.Type = "Customer";
+            itemDBContext.AspNetUsers.Add(user);
 
-            using (SHA256 sha256 = SHA256.Create())
+            try
             {
-                byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(user.Password));
-                string hashedPassword = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
-                user.Password = hashedPassword;
+                await itemDBContext.SaveChangesAsync(); // Save changes to the database
+                return "complete";
             }
-
-            itemDBContext.Users.Add(user);
-            await itemDBContext.SaveChangesAsync();
-
-            var loginResult = await LoginByRegister(user.Email, user.Password);
-            return loginResult;
+            catch (Exception ex)
+            {
+                // Handle any exceptions that may occur during the save process.
+                return "Error: " + ex.GetBaseException().Message;
+            }
         }
 
-        private async Task<string> LoginByRegister(string email, string password)
+        private async Task<string> LoginByRegister(string email, string PasswordHash)
         {
             using (HttpClient client = new HttpClient())
             {
                 string loginApiEndpoint = "https://localhost:7195/api/Users/Login";
-                var loginData = new { Email = email, Password = password };
+                var loginData = new { Email = email, PasswordHash = PasswordHash };
 
                 // Send a POST request to the login API
                 HttpResponseMessage response = await client.PostAsJsonAsync(loginApiEndpoint, loginData);
@@ -119,23 +115,23 @@ namespace eCommerceWebsite.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<string> Login(string email, string password)
+        public async Task<string> Login(string email, string PasswordHash)
         {
             // Check if the user exists
-            var user = await itemDBContext.Users.SingleOrDefaultAsync(u => u.Email == email);
+            var user = await itemDBContext.AspNetUsers.SingleOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
                 return "Invalid login credentials";
             }
 
-            // Check if the provided password matches the stored hashed password
-            if (!VerifyPasswordHash(password, user.Password))
+            // Check if the provided PasswordHash matches the stored hashed PasswordHash
+            if (!VerifyPasswordHash(PasswordHash, user.PasswordHash))
             {
                 return "Invalid login credentials";
             }
  
-            var result = await signInManager.PasswordSignInAsync(user.ID.ToString(), user.Password, true, false);
+            var result = await signInManager.PasswordSignInAsync(user.UserName.ToString(), user.PasswordHash, true, false);
 
             if(result.Succeeded)
             {
@@ -145,17 +141,17 @@ namespace eCommerceWebsite.Controllers
             return "Valid but not logged in";
         }
 
-        private bool VerifyPasswordHash(string password, string storedHash)
+        private bool VerifyPasswordHash(string PasswordHash, string storedHash)
         {
             using (SHA256 sha256 = SHA256.Create())
             {
-                // Compute the hash of the provided password
-                byte[] inputBytes = Encoding.UTF8.GetBytes(password);
+                // Compute the hash of the provided PasswordHash
+                byte[] inputBytes = Encoding.UTF8.GetBytes(PasswordHash);
                 byte[] hashedBytes = sha256.ComputeHash(inputBytes);
-                string hashedPassword = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+                string hashedPasswordHash = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
 
                 // Compare the computed hash with the stored hash
-                return string.Equals(hashedPassword, storedHash, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(hashedPasswordHash, storedHash, StringComparison.OrdinalIgnoreCase);
             }
         }
     }

@@ -10,7 +10,7 @@ namespace eCommerceWebsite.Models
         {
         }
         public DbSet<Items> Items { get; set; }
-        public DbSet<Users> Users { get; set; }
+        public DbSet<IdentityUser> AspNetUsers { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Server=LiamWaters\\SQLEXPRESS;Database=Ecommerce;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True;");
