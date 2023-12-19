@@ -4,9 +4,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.Data.SqlClient;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace eCommerceWebsite.Controllers
 {
@@ -14,15 +19,20 @@ namespace eCommerceWebsite.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly UserManager<IdentityUser> userManager;
 
         private readonly SignInManager<IdentityUser> signInManager;
 
         private readonly ItemDBContext itemDBContext;
 
-        public UsersController(ItemDBContext itemDBContext, SignInManager<IdentityUser> signInManager)
+        private IConfiguration configuration;
+
+        public UsersController(ItemDBContext itemDBContext, SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             this.itemDBContext = itemDBContext;
             this.signInManager = signInManager;
+            this.userManager = userManager;
+            this.configuration = configuration;
         }
 
         [HttpGet]
@@ -67,16 +77,17 @@ namespace eCommerceWebsite.Controllers
 
         [HttpPost]
         [Route("Registration")]
-        public async Task<String> Registration(Users user)
+        public async Task<String> Registration([FromBody] IdentityUser model)
         {
-            var existingUser = await itemDBContext.AspNetUsers.FirstOrDefaultAsync(u => u.Email == user.Email); // Retrieve first user with that email, or return null if not in db.
+            var existingEmail = await itemDBContext.AspNetUsers.FirstOrDefaultAsync(u => u.Email == model.Email);
 
-            if (existingUser != null)
+            if (existingEmail != null)
             {
                 return "Email is already registered.";
             }
 
-            itemDBContext.AspNetUsers.Add(user);
+            itemDBContext.AspNetUsers.Add(model);
+            var result = await signInManager.CreateUserPrincipalAsync(model);
 
             try
             {
@@ -114,45 +125,89 @@ namespace eCommerceWebsite.Controllers
             }
         }
 
-        [HttpPost("login")]
-        public async Task<string> Login(string email, string PasswordHash)
+        [HttpPost("Login")]
+        public async Task<ActionResult> Login([FromBody] Users model)
         {
+            Console.WriteLine("Got here");
+            string Email = model.Email;
+            string PasswordHash = model.PasswordHash;
             // Check if the user exists
-            var user = await itemDBContext.AspNetUsers.SingleOrDefaultAsync(u => u.Email == email);
+            var user = await itemDBContext.AspNetUsers.SingleOrDefaultAsync(u => u.Email == Email);
 
             if (user == null)
             {
-                return "Invalid login credentials";
+                return BadRequest(new { message = "Invalid login credentials" });
             }
 
             // Check if the provided PasswordHash matches the stored hashed PasswordHash
             if (!VerifyPasswordHash(PasswordHash, user.PasswordHash))
             {
-                return "Invalid login credentials";
+                return BadRequest(new { message = "Invalid login credentials" });
             }
  
-            var result = await signInManager.PasswordSignInAsync(user.UserName.ToString(), user.PasswordHash, true, false);
+            //var result = await signInManager.PasswordSignInAsync(user.UserName.ToString(), user.PasswordHash, true, false);
 
-            if(result.Succeeded)
+            //if(result.Succeeded)
+            if(true)
             {
-                return "Suceeded in logging in";
+                string token = CreateToken(user);
+                return Ok(new { token = token, username =  user.UserName});
             }
             // Return a successful response 
-            return "Valid but not logged in";
+            return Ok(new { message = "Valid but not logged in" });
         }
 
         private bool VerifyPasswordHash(string PasswordHash, string storedHash)
         {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                // Compute the hash of the provided PasswordHash
-                byte[] inputBytes = Encoding.UTF8.GetBytes(PasswordHash);
-                byte[] hashedBytes = sha256.ComputeHash(inputBytes);
-                string hashedPasswordHash = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
 
-                // Compare the computed hash with the stored hash
-                return string.Equals(hashedPasswordHash, storedHash, StringComparison.OrdinalIgnoreCase);
+            //USE THIS CODE LATER ONCE HASHING WORKS CORRECTLY...
+
+            //using (sha256 sha256 = sha256.create())
+            //{
+            //    // compute the hash of the provided passwordhash
+            //    byte[] inputbytes = encoding.utf8.getbytes(passwordhash);
+            //    byte[] hashedbytes = sha256.computehash(inputbytes);
+            //    string hashedpasswordhash = bitconverter.tostring(hashedbytes).replace("-", "").tolower();
+
+            //    // compare the computed hash with the stored hash
+            //    return string.equals(hashedpasswordhash, storedhash, stringcomparison.ordinalignorecase);
+            //}
+
+            return string.Equals(PasswordHash, storedHash);
+
+        }
+
+        private string CreateToken(IdentityUser user)
+        {
+
+            var tokenConfig = configuration.GetSection("AppSettings:Token").Value;
+
+            if (tokenConfig == null)
+            {
+                // Handle the case where the configuration value is not found.
+                // You might want to log an error or throw an exception.
+                throw new InvalidOperationException("Token configuration not found.");
             }
+
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserName)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfig!));
+                //configuration.GetSection("AppSettings:Token").Value!));
+
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+
+            var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddDays(1),
+                    signingCredentials: cred
+                );
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
         }
     }
 }

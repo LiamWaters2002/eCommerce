@@ -26,44 +26,74 @@ export class Home extends Component {
     handleLogin = async (event) => {
         event.preventDefault();
 
-        // Prepare the login data
-        let loginData = {
-            "email": this.state.loginEmail,
-            "password": this.state.loginPassword,
-        };
+        try {
+            // Prepare the login data
+            let loginData = {
+                "Email": this.state.loginEmail,
+                "PasswordHash": this.state.loginPassword,
+            };
+            console.log("Login Data:", loginData);
 
-        const response = await fetch('https://localhost:7195/api/Users/Login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(loginData),
-        });
-
-        if (response.ok) {
-            this.setState({
-                loginStatus: "Login successful",
-                loginMessage: "",
+            const response = await fetch('https://localhost:7195/api/Users/Login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginData),
             });
-        } else {
-            const data = await response.json();
+
+            if (response.ok) {
+                const data = await response.json();
+
+                if (data.token) {
+                    // Store the token in local storage or cookies
+                    localStorage.setItem('accessToken', data.token);
+                    localStorage.setItem('username', data.username)
+
+                    this.setState({
+                        loginStatus: "Login successful",
+                        loginMessage: "",
+                    });
+                } else {
+                    this.setState({
+                        loginStatus: "Incorrect details, try again",
+                        loginMessage: "Unexpected response format",
+                    });
+                }
+
+                const accessToken = localStorage.getItem('accessToken');
+                const username = localStorage.getItem('username')
+                console.log("Access Token: ", accessToken);
+                console.log("Username: ", username)
+            } else {
+                const data = await response.json();
+                this.setState({
+                    loginStatus: "Incorrect details, try again: " + JSON.stringify(data.message),
+                    loginMessage: JSON.stringify(data.message),
+                });
+
+                console.error("Login Status:", this.state.loginStatus);
+                console.error("Login Message:", this.state.loginMessage);
+            }
+        } catch (error) {
+            // Handle any exceptions that might occur during the asynchronous operations
+            console.error("An error occurred during login:", error);
             this.setState({
-                loginStatus: "Incorrect details, try again",
-                loginMessage: JSON.stringify(data),
+                loginStatus: "An error occurred during login",
+                loginMessage: error.message || "Unknown error",
             });
         }
-    };
+    }
 
+    // Move the handleRegistration method inside the class
     handleRegistration = async (event) => {
         event.preventDefault();
 
         // Prepare the registration data
         let registrationData = {
-            "id": 0,
-            "firstName": this.state.registerFirstName,
-            "lastName": this.state.registerLastName,
+            "userName": this.state.registerFirstName + " " + this.state.registerLastName,
             "email": this.state.registerEmail,
-            "password": this.state.registerPassword,
+            "passwordHash": this.state.registerPassword,
             "fund": 0,
             "type": "",
             "status": 0,
@@ -93,6 +123,7 @@ export class Home extends Component {
             });
         }
     };
+
 
 
     render() {
