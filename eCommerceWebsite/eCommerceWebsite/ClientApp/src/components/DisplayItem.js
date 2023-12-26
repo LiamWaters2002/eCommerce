@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+//import { createBrowserHistory } from 'history';
+//import { useNavigate } from 'react-router-dom';
+
+/*export const browserHistory = createBrowserHistory();*/
 
 export class DisplayItem extends Component {
     static displayName = DisplayItem.name;
@@ -13,10 +17,10 @@ export class DisplayItem extends Component {
             showForm: false,
             editItemMode: false,
             newItemName: '',
-            newItemManufacturer: '',
-            newItemUnitPrice: '',
-            newItemDiscount: '',
-            newItemQuantity: '',
+            newItemManufacturer: 0,
+            newItemUnitPrice: 0,
+            newItemDiscount: 0,
+            newItemQuantity: 0,
             newItemDescription: '',
             newItemImageURL: '',
             newItemStatus: '',
@@ -200,14 +204,33 @@ export class DisplayItem extends Component {
         this.setState({ editedItem: item });
     }
 
+    //goItemPage = () => {
+    //    const navigate = useNavigate();
+    //    const { selectedItem } = this.state;
+
+    //    if (selectedItem) {
+    //        const selectedItemID = selectedItem.id;
+    //        // Use the browserHistory object to navigate to the ItemPage with the selected item's ID
+    //        navigate(`/item-page/${selectedItemID}`);
+    //        //browserHistory.push(`/item-page/${selectedItemID}`);
+    //    } else {
+    //        console.error('No item selected for Item Page.');
+    //    }
+    //}
+
     render() {
         let contents;
+
+        let { selectedItem } = this.state;
+
 
         if (this.state.loading) {
             contents = <p><em>Loading...</em></p>;
         } else {
             contents = this.renderItemsTable(this.state.items);
         }
+
+        this.renderSelectedItem();
 
         let formOrEditItem;
 
@@ -228,7 +251,7 @@ export class DisplayItem extends Component {
                     <div className="form-group">
                         <label htmlFor="newManufacturer">Manufacturer:</label>
                         <input
-                            type="text"
+                            type="number"
                             id="newManufacturer"
                             value={this.state.newItemManufacturer}
                             onChange={this.handleNewItemChange('newItemManufacturer')}
@@ -237,7 +260,7 @@ export class DisplayItem extends Component {
                     <div className="form-group">
                         <label htmlFor="newUnitPrice">Unit Price:</label>
                         <input
-                            type="text"
+                            type="number"
                             id="newUnitPrice"
                             value={this.state.newItemUnitPrice}
                             onChange={this.handleNewItemChange('newItemUnitPrice')}
@@ -246,7 +269,7 @@ export class DisplayItem extends Component {
                     <div className="form-group">
                         <label htmlFor="newDiscount">Discount:</label>
                         <input
-                            type="text"
+                            type="number"
                             id="newDiscount"
                             value={this.state.newItemDiscount}
                             onChange={this.handleNewItemChange('newItemDiscount')}
@@ -255,7 +278,7 @@ export class DisplayItem extends Component {
                     <div className="form-group">
                         <label htmlFor="newQuantity">Quantity:</label>
                         <input
-                            type="text"
+                            type="number"
                             id="newQuantity"
                             value={this.state.newItemQuantity}
                             onChange={this.handleNewItemChange('newItemQuantity')}
@@ -379,7 +402,9 @@ export class DisplayItem extends Component {
                 <p>This component demonstrates fetching data from the server.</p>
                 {contents}
 
+                <button onClick={this.goItemPage}>Go To Item Page</button>
 
+                <p></p>
 
                 <button onClick={this.toggleForm}>
                     {this.state.showForm ? <b>Add A New Item</b> : 'Add A New Item'}
@@ -402,10 +427,32 @@ export class DisplayItem extends Component {
         );
     }
 
+    renderSelectedItem() {
+//        let { selectedItem } = this.state;
+
+//        return (
+//            <div>
+//                {selectedItem ? (
+//                    <div>
+//                        {/* Other components or content */}
+//{/*                        <Link to={`/item-page/${selectedItem.id}`}>*/}
+//{/*                            {selectedItem.name}*/}
+//{/*                        </Link>*/}
+//                        {console.log('Working a bit.' + selectedItem.id)}
+//                    </div>
+//                ) : (
+//                    console.error("broken")
+//                )}
+//            </div>
+//        );
+    }
+
     renderItemsTable(items) {
         const { selectedItem, editedItem } = this.state;
 
         return (
+
+
             <div>
                 <table className='table table-striped' aria-labelledby="tableLabel">
                     <thead>
@@ -437,6 +484,7 @@ export class DisplayItem extends Component {
                                 <td>{item.name}</td>
                                 <td>{item.manufacturer}</td>
                                 <td>{item.unitPrice}</td>
+                                <td>{item.unitPrice}</td>
                                 <td>{item.discount}</td>
                                 <td>{item.quantity}</td>
                                 <td>{item.description}</td>
@@ -456,3 +504,4 @@ export class DisplayItem extends Component {
         );
     }
 }
+export default DisplayItem;
