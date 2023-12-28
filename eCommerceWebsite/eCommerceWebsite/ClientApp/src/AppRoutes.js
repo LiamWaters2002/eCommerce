@@ -18,11 +18,11 @@ const AppRoutes = [
         element: <FetchData />
     },
     {
-        path: '/display-item',
+        path: '/products',
         element: <DisplayItem />
     },
     {
-        path: '/display-user',
+        path: '/display-users',
         element: <DisplayUser />
     }
 ];
