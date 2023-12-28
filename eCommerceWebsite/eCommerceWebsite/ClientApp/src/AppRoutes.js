@@ -3,6 +3,7 @@ import { FetchData } from "./components/FetchData";
 import { Home } from "./components/Home";
 import { DisplayItem } from "./components/DisplayItem";
 import { DisplayUser } from "./components/DisplayUser";
+import ItemPage from "./components/ItemPage";
 
 const AppRoutes = [
     {
@@ -18,8 +19,12 @@ const AppRoutes = [
         element: <FetchData />
     },
     {
-        path: '/products',
-        element: <DisplayItem />
+        path: '/products/',
+        element: <ItemPage />
+    },
+    {
+        path: '/products/:itemId',
+        element: <ItemPage />
     },
     {
         path: '/display-users',

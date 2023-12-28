@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 //import { createBrowserHistory } from 'history';
-//import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 /*export const browserHistory = createBrowserHistory();*/
 
@@ -428,23 +428,23 @@ export class DisplayItem extends Component {
     }
 
     renderSelectedItem() {
-//        let { selectedItem } = this.state;
+        let { selectedItem } = this.state;
 
-//        return (
-//            <div>
-//                {selectedItem ? (
-//                    <div>
-//                        {/* Other components or content */}
-//{/*                        <Link to={`/item-page/${selectedItem.id}`}>*/}
-//{/*                            {selectedItem.name}*/}
-//{/*                        </Link>*/}
-//                        {console.log('Working a bit.' + selectedItem.id)}
-//                    </div>
-//                ) : (
-//                    console.error("broken")
-//                )}
-//            </div>
-//        );
+        return (
+            <div>
+                {selectedItem ? (
+                    <div>
+                        {/* Other components or content */}
+                        <Link to={`/products/${selectedItem.id}`}>
+                            {selectedItem.name}
+                        </Link>
+                        {console.log('Working a bit.' + selectedItem.id)}
+                    </div>
+                ) : (
+                    console.error("broken")
+                )}
+            </div>
+        );
     }
 
     renderItemsTable(items) {
