@@ -19,7 +19,7 @@ export default function ItemPage(props) {
                 .catch((err) => console.error(err));
         } else {
             // Fetch all the items data
-            fetch('https://jsonplaceholder.typicode.com/posts')
+            fetch('https://localhost:7195/api/Item/GetItem')
                 .then((res) => res.json())
                 .then((data) => setData(data))
                 .catch((err) => console.error(err));
@@ -36,9 +36,9 @@ export default function ItemPage(props) {
                         data.map((item) => (
                             <div key={item.id} className="post">
                                 <h3>
-                                    {item.title} - {item.id}
+                                    Name:{item.name} - ID:{item.id} - £{item.unitPrice} - Total Quantity:{item.quantity} - Manufacturer: {item.manufacturer}
                                 </h3>
-                                <p>{item.body}</p>
+                                <p>{item.description}</p>
                                 <img
                                     src={`https://picsum.photos/id/${item.id}/200/300`}
                                     alt={item.title}

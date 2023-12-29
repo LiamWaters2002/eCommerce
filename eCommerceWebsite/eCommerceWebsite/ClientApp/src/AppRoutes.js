@@ -20,10 +20,18 @@ const AppRoutes = [
     },
     {
         path: '/products/',
-        element: <ItemPage />
+        element: <DisplayItem />
     },
     {
         path: '/products/:itemId',
+        element: <DisplayItem />
+    },
+    {
+        path: '/example-products/',
+        element: <ItemPage />
+    },
+    {
+        path: '/example-products/:itemId',
         element: <ItemPage />
     },
     {
