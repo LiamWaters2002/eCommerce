@@ -17,10 +17,23 @@ namespace eCommerceWebsite.Controllers
         }
 
         [HttpGet]
-        [Route("GetItem")]
+        [Route("GetItems")]
         public async Task<IEnumerable<Items>> GetItems()
         {
             return await itemDBContext.Items.ToListAsync();
+        }
+
+        [HttpGet]
+        [Route("GetItemById")]
+        public async Task<IActionResult> GetItemById(int id)
+        {
+            var item = await itemDBContext.Items.FindAsync(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(item);
         }
 
         [HttpPost]

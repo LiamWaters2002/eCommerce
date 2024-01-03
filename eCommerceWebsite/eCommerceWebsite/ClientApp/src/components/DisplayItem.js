@@ -17,7 +17,7 @@ export class DisplayItem extends Component {
             showForm: false,
             editItemMode: false,
             newItemName: '',
-            newItemManufacturer: 0,
+            newItemManufacturer: '',
             newItemUnitPrice: 0,
             newItemDiscount: 0,
             newItemQuantity: 0,
@@ -35,7 +35,7 @@ export class DisplayItem extends Component {
 
     async fetchItems() {
         try {
-            const response = await fetch('https://localhost:7195/api/Item/GetItem'); // Replace with your API URL
+            const response = await fetch('https://localhost:7195/api/Item/GetItems'); // Replace with your API URL
             if (response.ok) {
                 const data = await response.json();
                 this.setState({ items: data, loading: false });
@@ -251,7 +251,7 @@ export class DisplayItem extends Component {
                     <div className="form-group">
                         <label htmlFor="newManufacturer">Manufacturer:</label>
                         <input
-                            type="number"
+                            type="text"
                             id="newManufacturer"
                             value={this.state.newItemManufacturer}
                             onChange={this.handleNewItemChange('newItemManufacturer')}

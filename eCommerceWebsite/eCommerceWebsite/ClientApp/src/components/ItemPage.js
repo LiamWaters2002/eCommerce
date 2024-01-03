@@ -1,61 +1,100 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './CSS/StyleSheet.css';
 
 export default function ItemPage(props) {
-    // Get the itemId from the URL
     const { itemId } = useParams();
-
-    // Create a state variable to store the item or items data
     const [data, setData] = useState(null);
+    const location = useLocation();
 
-    // Fetch the item or items data from the API when the component mounts
     useEffect(() => {
-        // Check if the itemId exists or not
         if (itemId) {
-            // Fetch the item data using the itemId
-            fetch(`https://jsonplaceholder.typicode.com/posts/${itemId}`)
+            fetch(`https://localhost:7195/api/Item/GetItemById?id=${itemId}`)
                 .then((res) => res.json())
                 .then((data) => setData(data))
                 .catch((err) => console.error(err));
         } else {
-            // Fetch all the items data
-            fetch('https://localhost:7195/api/Item/GetItem')
+            fetch('https://localhost:7195/api/Item/GetItems')
                 .then((res) => res.json())
                 .then((data) => setData(data))
                 .catch((err) => console.error(err));
         }
     }, [itemId]);
 
-    // Render the item or items data or a loading message
     return (
-        <div>
+        <div className="item-page-container">
             {data ? (
-                <div>
+                <div className="row row-cols-1 row-cols-md-3 g-4">
                     {Array.isArray(data) ? (
-                        // Render the array of items
                         data.map((item) => (
-                            <div key={item.id} className="post">
-                                <h3>
-                                    Name:{item.name} - ID:{item.id} - £{item.unitPrice} - Total Quantity:{item.quantity} - Manufacturer: {item.manufacturer}
-                                </h3>
-                                <p>{item.description}</p>
-                                <img
-                                    src={`https://picsum.photos/id/${item.id}/200/300`}
-                                    alt={item.title}
-                                />
+                            <div key={item.id} className="col">
+                                {location.pathname !== `/example-products/${item.id}` ? (
+                                    <Link to={`/example-products/${item.id}`} className="card-link">
+                                        <div className="card">
+                                            <div className="card-body">
+                                                <h3 className="card-title">
+                                                    Name: {item.name} - ID: {item.id} - £{item.unitPrice} - Total Quantity: {item.quantity} - Manufacturer: {item.manufacturer}
+                                                </h3>
+                                                <p className="card-text">{item.description}</p>
+                                                <img
+                                                    src={item.imageURL}
+                                                    alt={item.title}
+                                                    className="card-img-top"
+                                                />
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ) : (
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <h3 className="card-title">
+                                                Name: {item.name} - ID: {item.id} - £{item.unitPrice} - Total Quantity: {item.quantity} - Manufacturer: {item.manufacturer}
+                                            </h3>
+                                            <p className="card-text">{item.description}</p>
+                                            <img
+                                                src={item.imageURL}
+                                                alt={item.title}
+                                                className="card-img-top"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ))
                     ) : (
-                        // Render the single item
-                        <div className="post">
-                            <h3>
-                                {data.title} - {data.id}
-                            </h3>
-                            <p>{data.body}</p>
-                            <img
-                                src={`https://picsum.photos/id/${data.id}/200/300`}
-                                alt={data.title}
-                            />
+                        <div className="col">
+                            {location.pathname !== `/example-products/${data.id}` ? (
+                                <Link to={`/example-products/${data.id}`} className="card-link">
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <h3 className="card-title">
+                                                {data.title} - {data.id}
+                                            </h3>
+                                            <p className="card-text">{data.body}</p>
+                                            <img
+                                                src={data.imageURL}
+                                                alt={data.title}
+                                                className="card-img-top"
+                                            />
+                                        </div>
+                                    </div>
+                                </Link>
+                            ) : (
+                                <div className="card">
+                                    <div className="card-body">
+                                        <h3 className="card-title">
+                                            {data.title} - {data.id}
+                                        </h3>
+                                        <p className="card-text">{data.body}</p>
+                                        <img
+                                            src={data.imageURL}
+                                            alt={data.title}
+                                            className="card-img-top"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
