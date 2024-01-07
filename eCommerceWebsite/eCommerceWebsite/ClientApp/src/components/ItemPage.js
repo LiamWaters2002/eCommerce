@@ -24,7 +24,7 @@ export default function ItemPage(props) {
 
     // Function to render a single item card
     const renderCard = (item) => (
-        <div key={item.id} className="col-6">
+        <div key={item.id} className="col-4">
             {location.pathname !== `/example-products/${item.id}` ? (
                 // Display a link to the individual item page if not on the individual item page
                 <Link to={`/example-products/${item.id}`} className="card-link">
@@ -71,7 +71,7 @@ export default function ItemPage(props) {
         <div className="item-page-container" style={{ width: '1280px' }}>
             {item ? (
                 // Display items in a responsive grid layout using bootstrap
-                <div className="row row-cols-2 row-cols-md-3 g-5">
+                <div className="row row-cols-md-3 row-cols-md-3 g-5">
                     {Array.isArray(item) ? (
                         // If item is an array, map through each item and render a card
                         item.map((itemData) => renderCard(itemData))
