@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faPlus, faUsers, faShoppingCart, faClipboardList, faDesktop } from '@fortawesome/free-solid-svg-icons';
 import './NavMenu.css';
+import { jwtDecode } from 'jwt-decode';
 
 export class NavMenu extends Component {
     static displayName = NavMenu.name;
@@ -24,16 +25,35 @@ export class NavMenu extends Component {
     }
 
     render() {
+        let token = localStorage.getItem('accessToken');
+        let username = '';
+        const decodedToken = jwtDecode(token);
+
+        if (token) {
+            console.log(decodedToken);
+            username = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
+            console.log(username);
+        }
+        else {
+        }
         return (
             <header>
                 <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" container light>
                     <NavbarBrand tag={Link} to="/">eCommerceWebsite</NavbarBrand>
+
                     <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
                     <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
                         <ul className="navbar-nav flex-grow">
                             <NavItem>
+
+                            <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/">
-                                    <FontAwesomeIcon icon={faUser} /> Profile
+                                    <FontAwesomeIcon icon={faUser} /> {username ? `Welcome, ${username}` : 'Profile'}
+                                </NavLink>
+                                </NavItem>
+
+                            <NavLink tag={Link} className="text-dark" to="/">
+                                <FontAwesomeIcon icon={faUser} /> Profile
                                 </NavLink>
                             </NavItem>
                             <NavItem>

@@ -48,7 +48,7 @@ export class Home extends Component {
                 if (data.token) {
                     // Store the token in local storage or cookies
                     localStorage.setItem('accessToken', data.token);
-                    localStorage.setItem('username', data.username)
+                    localStorage.setItem('username', data.username);
 
                     this.setState({
                         loginStatus: "Login successful",
