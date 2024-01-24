@@ -14,7 +14,8 @@ export class NavMenu extends Component {
 
         this.toggleNavbar = this.toggleNavbar.bind(this);
         this.state = {
-            collapsed: true
+            collapsed: true,
+            username: '',
         };
     }
 
@@ -24,18 +25,46 @@ export class NavMenu extends Component {
         });
     }
 
-    render() {
+    componentDidMount() {
+        this.checkTokenExpiration();
+    }
+
+    checkTokenExpiration() {
         let token = localStorage.getItem('accessToken');
         let username = '';
-        const decodedToken = jwtDecode(token);
+        let timestamp = 0;
+        let expirationTime = new Date();
+        console.log("got here...");
 
         if (token) {
+            let decodedToken = jwtDecode(token);
             console.log(decodedToken);
-            username = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
-            console.log(username);
+            username = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+            timestamp = decodedToken.exp;
+            expirationTime = new Date(timestamp * 1000);
+            console.log('Token expiration time (UTC):', expirationTime.toUTCString());
+
+            let timeRemaining = expirationTime.getTime() - new Date().getTime();
+            console.log("Time Remaining:" + timeRemaining);
+
+            // Set a timeout to automatically log out the user when the token expires
+            setTimeout(() => {
+                this.setState({
+                    username: '', // Clear the username in the component state
+                });
+                localStorage.removeItem('accessToken'); // Clear the token
+            }, timeRemaining);
         }
-        else {
-        }
+
+        this.setState({
+            username, // Update the username in the component state
+        });
+    }
+
+    render() {
+
+        let { username } = this.state;
+
         return (
             <header>
                 <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" container light>
@@ -44,41 +73,35 @@ export class NavMenu extends Component {
                     <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
                     <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
                         <ul className="navbar-nav flex-grow">
-                            <NavItem>
 
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/">
                                     <FontAwesomeIcon icon={faUser} /> {username ? `Welcome, ${username}` : 'Profile'}
                                 </NavLink>
                                 </NavItem>
-
-                            <NavLink tag={Link} className="text-dark" to="/">
-                                <FontAwesomeIcon icon={faUser} /> Profile
-                                </NavLink>
-                            </NavItem>
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/products">
-                                    <FontAwesomeIcon icon={faPlus} /> Add Items
+                                    <FontAwesomeIcon icon={faPlus} /> Sell Items
                                 </NavLink>
                             </NavItem>
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/display-users">
-                                    <FontAwesomeIcon icon={faUsers} /> Display Users
+                                    <FontAwesomeIcon icon={faUsers} /> Sellers
                                 </NavLink>
                             </NavItem>
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/display-cart">
-                                    <FontAwesomeIcon icon={faShoppingCart} /> Display Cart
+                                    <FontAwesomeIcon icon={faShoppingCart} /> Your Basket
                                 </NavLink>
                             </NavItem>
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/display-order">
-                                    <FontAwesomeIcon icon={faClipboardList} /> Display Orders
+                                    <FontAwesomeIcon icon={faClipboardList} /> Customer Orders
                                 </NavLink>
                             </NavItem>
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/example-products">
-                                    <FontAwesomeIcon icon={faDesktop} /> Display Item
+                                    <FontAwesomeIcon icon={faDesktop} /> Shop
                                 </NavLink>
                             </NavItem>
                         </ul>

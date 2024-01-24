@@ -5,3 +5,121 @@
 .post {
     margin-bottom: 20px;
 }
+
+.custom-img-size {
+    height: 200px; /* Set the desired height for your images */
+}
+
+.card-link {
+    color: black;
+    padding: 10px; /* Add padding for better visual appearance */
+    text-decoration: none; /* Remove default underline */
+}
+
+.card-link:hover {
+    color: black; /* Change the color on hover to black */
+}
+
+.card:hover .card-title {
+    text-decoration: underline;
+}
+
+.item-image {
+    margin-right: 20px; /* Adjust the margin as needed */
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column; /* Display as a column */
+}
+
+.item-details-container {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column; /* Display as a column */
+    padding-left: 100%;
+}
+
+.image-container {
+    margin-top: 20px; /* Adjust the margin as needed */
+    margin-right: 20px;
+}
+
+.item-image {
+    height: 200px;
+}
+
+.item-details-container {
+    display: flex;
+    align-items: flex-start;
+}
+
+.image-container {
+    margin-top: 20px; /* Adjust the margin as needed */
+    margin-right: 20px;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-description {
+    margin-top: 20px;
+}
+
+.item-image {
+    height: 200px;
+}
+
+.item-details-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.image-and-description-container {
+    display: flex;
+}
+
+.image-container {
+    margin-right: 20px;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-description {
+    margin-top: 20px;
+}
+
+.item-image {
+    height: 200px;
+}
+.item-details-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.image-and-description-container {
+    display: flex;
+}
+
+.image-container {
+    margin-right: 20px;
+}
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-description {
+    margin-top: 20px;
+}
+
+.item-image {
+    height: 200px;
+}
+

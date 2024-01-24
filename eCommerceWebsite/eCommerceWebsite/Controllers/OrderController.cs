@@ -18,27 +18,47 @@ namespace eCommerceWebsite.Controllers
 
         [HttpGet]
         [Route("GetOrders")]
-        public async Task<IEnumerable<Items>> GetOrders()
+        public async Task<IEnumerable<Orders>> GetOrders()
         {
-            return await itemDBContext.Items.ToListAsync();
+            return await itemDBContext.Orders.ToListAsync();
+        }
+
+        [HttpGet]
+        [Route("GetOrdersById")]
+        public async Task<IEnumerable<Orders>> GetOrdersById(string userId)
+        {
+            // Assuming there is a UserId property in the Orders model
+            return await itemDBContext.Orders
+                .Where(order => order.UserId == userId)
+                .ToListAsync();
+        }
+
+        [HttpGet]
+        [Route("GetSellerItemsById")]
+        public async Task<IEnumerable<Items>> GetSellerItemsById(string userId)
+        {
+            // Assuming there is a UserId property in the Orders model
+            return await itemDBContext.Items
+                .Where(item => item.Manufacturer == userId)
+                .ToListAsync();
         }
 
         [HttpPost]
         [Route("PlaceOrder")]
-        public async Task<Items> PlaceOrder(Items item)
+        public async Task<Orders> PlaceOrder(Orders order)
         {
-            itemDBContext.Items.Add(item);
+            itemDBContext.Orders.Add(order);
             await itemDBContext.SaveChangesAsync();
-            return item;
+            return order;
         }
 
         [HttpPatch]
         [Route("UpdateOrder/{id}")]
-        public async Task<Items> UpdateOrder(Items item)
+        public async Task<Orders> UpdateOrder(Orders order)
         {
-            itemDBContext.Entry(item).State = EntityState.Modified;
+            itemDBContext.Entry(order).State = EntityState.Modified;
             await itemDBContext.SaveChangesAsync();
-            return item;
+            return order;
         }
 
         [HttpDelete]
@@ -46,11 +66,11 @@ namespace eCommerceWebsite.Controllers
         public bool CancelOrder(int id)
         {
             bool isCanceled = false;
-            var item = itemDBContext.Items.Find(id);
-            if (item != null)
+            var order = itemDBContext.Orders.Find(id);
+            if (order != null)
             {
                 isCanceled = true;
-                itemDBContext.Entry(item).State = EntityState.Deleted;
+                itemDBContext.Entry(order).State = EntityState.Deleted;
                 itemDBContext.SaveChanges();
             }
             return isCanceled;
