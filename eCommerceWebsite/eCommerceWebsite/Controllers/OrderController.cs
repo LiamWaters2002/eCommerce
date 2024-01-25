@@ -34,12 +34,21 @@ namespace eCommerceWebsite.Controllers
         }
 
         [HttpGet]
-        [Route("GetSellerItemsById")]
+        [Route("GetSellerItemsById/{userId}")]
         public async Task<IEnumerable<Items>> GetSellerItemsById(string userId)
         {
             // Assuming there is a UserId property in the Orders model
             return await itemDBContext.Items
                 .Where(item => item.Manufacturer == userId)
+                .ToListAsync();
+        }
+
+        [HttpGet]
+        [Route("GetSellerOrders/{userId}")]
+        public async Task<IEnumerable<Orders>> GetSellerOrders(string userId)
+        {
+            return await itemDBContext.Orders
+                .Where(order => itemDBContext.Items.Any(item => item.ID == order.ItemId && item.Manufacturer == userId))
                 .ToListAsync();
         }
 

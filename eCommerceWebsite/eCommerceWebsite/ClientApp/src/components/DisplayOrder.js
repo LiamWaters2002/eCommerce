@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 export class DisplayOrder extends Component {
     static displayName = DisplayOrder.name;
@@ -21,8 +22,8 @@ export class DisplayOrder extends Component {
 
     // Run when the component is mounted onto the DOM.
     componentDidMount() {
-        this.fetchOrders();
         this.fetchItems();
+        this.fetchOrders();
         this.fetchUsers();
     }
 
@@ -42,8 +43,17 @@ export class DisplayOrder extends Component {
     }
 
     async fetchOrders() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            console.error('No access token found.');
+            return;
+        }
+
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+
         try {
-            const response = await fetch('https://localhost:7195/api/Order/GetOrders'); // Replace with your API URL
+            const response = await fetch(`https://localhost:7195/api/Order/GetSellerOrders/${userId}`); // Replace with your API URL
             if (response.ok) {
                 const data = await response.json();
                 this.setState({ orders: data, loadingOrders: false });
@@ -57,8 +67,17 @@ export class DisplayOrder extends Component {
     }
 
     async fetchItems() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            console.error('No access token found.');
+            return;
+        }
+
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+
         try {
-        const response = await fetch('https://localhost:7195/api/Item/GetItems')
+        const response = await fetch(`https://localhost:7195/api/Order/GetSellerItemsById/${userId}`)
             if (response.ok) {
                 const data = await response.json();
                 this.setState({ items: data, loadingItems: false });
@@ -409,7 +428,8 @@ export class DisplayOrder extends Component {
     }
 
     renderOrdersTable(orders, items, users) {
-        const { selectedOrder} = this.state;
+        const { selectedOrder } = this.state;
+        let totalRevenue = 0;
 
         return (
             <div>
@@ -420,7 +440,9 @@ export class DisplayOrder extends Component {
                             <th>Customer</th>
                             <th>Order Date</th>
                             <th>Item Name</th>
+                            <th>Unit Price</th>
                             <th>Quantity of Item</th>
+                            <th>Total Price</th>
                             <th>Item Image</th>
                         </tr>
                     </thead>
@@ -428,17 +450,19 @@ export class DisplayOrder extends Component {
                         {orders.map(order => {
 
                             let customer = users.find(user => user.id === order.userId);
-                            console.log(users);
-                            console.log(orders);
                             let customerName = "";
                             let selectedItem = items.find(item => item.id === order.itemId);
                             let imageUrl = "https://cdn.iconscout.com/icon/free/png-256/free-question-mark-1768084-1502257.png";
                             let name = "";
+                            let unitPrice = 0;
+                            let totalPrice = 0;
 
                             if (selectedItem) {
                                 imageUrl = selectedItem.imageURL;
                                 name = selectedItem.name;
-                                console.log(selectedItem);
+                                unitPrice = selectedItem.unitPrice;
+                                totalPrice = order.orderNumber * unitPrice;
+                                totalRevenue += totalPrice;
                             }
                             if (customer) {
                                 customerName = customer.userName;
@@ -457,14 +481,18 @@ export class DisplayOrder extends Component {
                                     <td>{customerName}</td>
                                     <td>{order.orderDate}</td>
                                     <td>{name}</td>
+                                    <td>{unitPrice.toFixed(2)}</td>
                                     <td>{order.orderNumber}</td>
+                                    <td>{totalPrice.toFixed(2)}</td>
                                     <td>
-                                        <img src={imageUrl} alt={`Image for ${order.itemId}`} style={{ maxWidth: '100px' }}/>
+                                        <img src={imageUrl} alt={`Image for ${order.itemId}`} style={{ maxWidth: '100px' }} />
                                     </td>
                                 </tr>
-                            )})}
+                            );
+                        })}
                     </tbody>
                 </table>
+                <p>Total Revenue: {totalRevenue.toFixed(2)}</p>
             </div>
         );
     }

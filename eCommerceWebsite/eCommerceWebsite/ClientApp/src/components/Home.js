@@ -132,8 +132,8 @@ export class Home extends Component {
     render() {
         return (
             <div>
-                <h1>Welcome to Your Website</h1>
-                <h2>Register or login to access your basket...</h2>
+                <h1>Start shopping today</h1>
+                <h2>Login/Register below</h2>
 
                 <div className="row">
                     <div className="col-md-6">

@@ -407,7 +407,6 @@ export class DisplayCart extends Component {
         return (
             <div>
                 <h1 id="tableLabel">Your Basket</h1>
-                <p>This component demonstrates fetching data from the server.</p>
                 {contents}
 
                 <button onClick={this.deleteOrder} disabled={!this.state.selectedOrder}>
@@ -421,6 +420,7 @@ export class DisplayCart extends Component {
 
     renderOrdersTable(orders, items, users) {
         const { selectedOrder } = this.state;
+        let totalCost = 0;
 
         return (
             <div>
@@ -428,32 +428,38 @@ export class DisplayCart extends Component {
                     <thead>
                         <tr>
                             <th>Select</th>
-{/*                            <th>Customer</th>*/}
+                            {/* <th>Customer</th> */}
                             <th>Order Date</th>
                             <th>Item Name</th>
+                            <th>Unit Price</th>
                             <th>Quantity of Item</th>
+                            <th>Total Price</th>
                             <th>Item Image</th>
                         </tr>
                     </thead>
                     <tbody>
                         {orders.map(order => {
-
                             let customer = users.find(user => user.id === order.userId);
                             console.log(users);
                             console.log(orders);
-/*                            let customerName = "";*/
+
                             let selectedItem = items.find(item => item.id === order.itemId);
                             let imageUrl = "https://cdn.iconscout.com/icon/free/png-256/free-question-mark-1768084-1502257.png";
                             let name = "";
+                            let unitPrice = 0;
+                            let totalPrice = 0;
 
                             if (selectedItem) {
                                 imageUrl = selectedItem.imageURL;
                                 name = selectedItem.name;
+                                unitPrice = selectedItem.unitPrice;
+                                totalPrice = order.orderNumber * selectedItem.unitPrice;
+                                totalCost += totalPrice;
                                 console.log(selectedItem);
                             }
-                            //if (customer) {
-                            //    customerName = customer.userName;
-                            //}
+                            // if (customer) {
+                            //     customerName = customer.userName;
+                            // }
 
                             return (
                                 <tr key={order.id}>
@@ -465,10 +471,12 @@ export class DisplayCart extends Component {
                                             checked={selectedOrder && selectedOrder.id === order.id}
                                         />
                                     </td>
-{/*                                    <td>{customerName}</td>*/}
+                                    {/* <td>{customerName}</td> */}
                                     <td>{order.orderDate}</td>
                                     <td>{name}</td>
+                                    <td>{unitPrice.toFixed(2)}</td>
                                     <td>{order.orderNumber}</td>
+                                    <td>{totalPrice.toFixed(2)}</td>
                                     <td>
                                         <img src={imageUrl} alt={`Image for ${order.itemId}`} style={{ maxWidth: '100px' }} />
                                     </td>
@@ -477,6 +485,7 @@ export class DisplayCart extends Component {
                         })}
                     </tbody>
                 </table>
+                <p>Total Cost: {totalCost.toFixed(2)}</p>
             </div>
         );
     }

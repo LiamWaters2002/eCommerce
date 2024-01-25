@@ -37,7 +37,6 @@
     display: flex;
     align-items: flex-start;
     flex-direction: column; /* Display as a column */
-    padding-left: 100%;
 }
 
 .image-container {
@@ -120,6 +119,8 @@
 }
 
 .item-image {
-    height: 200px;
+    height: 300px;
 }
+
+
 

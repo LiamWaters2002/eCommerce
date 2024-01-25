@@ -410,8 +410,7 @@ export class DisplayItem extends Component {
 
         return (
             <div>
-                <h1 id="tableLabel">Items</h1>
-                <p>This component demonstrates fetching data from the server.</p>
+                <h1 id="tableLabel">Your listed items on sale</h1>
                 {contents}
 
                 <button onClick={this.goItemPage}>Go To Item Page</button>
@@ -459,12 +458,12 @@ export class DisplayItem extends Component {
         );
     }
 
+
+
     renderItemsTable(items) {
         const { selectedItem, editedItem } = this.state;
 
         return (
-
-
             <div>
                 <table className='table table-striped' aria-labelledby="tableLabel">
                     <thead>
@@ -472,13 +471,10 @@ export class DisplayItem extends Component {
                             <th>Select</th>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Manufacturer</th>
                             <th>Unit Price</th>
-                            <th>Discount</th>
-                            <th>Quantity</th>
+
                             <th>Description</th>
                             <th>Image URL</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -494,12 +490,22 @@ export class DisplayItem extends Component {
                                 </td>
                                 <td>{item.id}</td>
                                 <td>{item.name}</td>
-                                <td>{item.manufacturer}</td> 
+
                                 <td>{item.unitPrice}</td>
-                                <td>{item.unitPrice}</td>
-                                <td>{item.discount}</td>
-                                <td>{item.quantity}</td>
-                                <td>{item.description}</td>
+                                <td>
+                                    <div style={{ maxWidth: '200px', overflow: 'hidden' }}>
+                                        {item.description.length > 100 ? (
+                                            <>
+                                                {item.description.substring(0, 100)}
+                                                <span style={{ color: 'blue', cursor: 'pointer' }} onClick={() => this.handleReadMore(item.id)}>
+                                                    Read More
+                                                </span>
+                                            </>
+                                        ) : (
+                                            item.description
+                                        )}
+                                    </div>
+                                </td>
                                 <td>
                                     <img
                                         src={item.imageURL}
@@ -507,7 +513,6 @@ export class DisplayItem extends Component {
                                         style={{ maxWidth: '100px' }} // Adjust the image size as needed
                                     />
                                 </td>
-                                <td>{item.status}</td>
                             </tr>
                         )}
                     </tbody>
