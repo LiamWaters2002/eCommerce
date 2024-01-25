@@ -23,6 +23,10 @@ export class Home extends Component {
         this.setState({ [id]: value });
     };
 
+    handleLogout = () => {
+        localStorage.removeItem('accessToken');
+    };
+
     handleLogin = async (event) => {
         event.preventDefault();
 
@@ -48,7 +52,6 @@ export class Home extends Component {
                 if (data.token) {
                     // Store the token in local storage or cookies
                     localStorage.setItem('accessToken', data.token);
-                    localStorage.setItem('username', data.username);
 
                     this.setState({
                         loginStatus: "Login successful",
@@ -218,6 +221,8 @@ export class Home extends Component {
                             </div>
                         </div>
                     </div>
+
+                    <button onClick={this.handleLogout} className="btn btn-danger">Logout</button>
                 </div>
             </div>
         );

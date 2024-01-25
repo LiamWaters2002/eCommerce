@@ -42,6 +42,20 @@ namespace eCommerceWebsite.Controllers
             return await itemDBContext.AspNetUsers.ToListAsync();
         }
 
+        [HttpGet]
+        [Route("GetUserById/{id}")]
+        public async Task<IActionResult> GetUserById(string id)
+        {
+            var user = await itemDBContext.AspNetUsers.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound(); // Return 404 Not Found if the user with the given ID is not found.
+            }
+
+            return Ok(user); // Return 200 OK with the user details.
+        }
+
         [HttpPost]
         [Route("AddUser")]
         public async Task<Users> AddUser(Users user)
@@ -151,7 +165,7 @@ namespace eCommerceWebsite.Controllers
             if(true)
             {
                 string token = CreateToken(user);
-                return Ok(new { token = token, username =  user.UserName});
+                return Ok(new { token = token, username =  user.Id});
             }
             // Return a successful response 
             return Ok(new { message = "Valid but not logged in" });
@@ -191,7 +205,7 @@ namespace eCommerceWebsite.Controllers
 
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName)
+                new Claim(ClaimTypes.Name, user.Id)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfig!));

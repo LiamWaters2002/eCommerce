@@ -29,7 +29,7 @@ export class NavMenu extends Component {
         this.checkTokenExpiration();
     }
 
-    checkTokenExpiration() {
+    async checkTokenExpiration() {
         let token = localStorage.getItem('accessToken');
         let username = '';
         let timestamp = 0;
@@ -39,7 +39,16 @@ export class NavMenu extends Component {
         if (token) {
             let decodedToken = jwtDecode(token);
             console.log(decodedToken);
-            username = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+            let id = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+            console.log(id);
+            const response = await fetch(`https://localhost:7195/api/Users/GetUserById/${id}`)
+            if (response.ok) {
+                const data = await response.json();
+                username = data.userName;
+            } else {
+                // Handle the case where the fetch was not successful
+                console.error('Error fetching user data:', response.status, response.statusText);
+            }
             timestamp = decodedToken.exp;
             expirationTime = new Date(timestamp * 1000);
             console.log('Token expiration time (UTC):', expirationTime.toUTCString());
@@ -84,11 +93,11 @@ export class NavMenu extends Component {
                                     <FontAwesomeIcon icon={faPlus} /> Sell Items
                                 </NavLink>
                             </NavItem>
-                            <NavItem>
-                                <NavLink tag={Link} className="text-dark" to="/display-users">
-                                    <FontAwesomeIcon icon={faUsers} /> Sellers
-                                </NavLink>
-                            </NavItem>
+                            {/*<NavItem>*/}
+                            {/*    <NavLink tag={Link} className="text-dark" to="/display-users">*/}
+                            {/*        <FontAwesomeIcon icon={faUsers} /> Sellers*/}
+                            {/*    </NavLink>*/}
+                            {/*</NavItem>*/}
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/display-cart">
                                     <FontAwesomeIcon icon={faShoppingCart} /> Your Basket

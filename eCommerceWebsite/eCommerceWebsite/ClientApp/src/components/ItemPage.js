@@ -8,7 +8,8 @@ export default function ItemPage(props) {
     const { itemId } = useParams();
     const [item, setItem] = useState(null);
     const location = useLocation();
-
+    const [quantity, setQuantity] = useState(1);
+    const [users, setUsers] = useState([]);
 
     useEffect(() => {
         if (itemId) {
@@ -22,9 +23,14 @@ export default function ItemPage(props) {
                 .then((itemData) => setItem(itemData))
                 .catch((err) => console.error(err));
         }
+
+        fetchUsers();
     }, [itemId]);
 
-    const IndividualItemPage = ({ item, onBuyClick, onQuantityChange }) => (
+    let IndividualItemPage = ({ item, onBuyClick, onQuantityChange }) => {
+
+        const user = users.find((user) => user.id === item.manufacturer);
+        return (
         <div className="item-details-container">
             {/* Display item name at the top */}
             <h1>{item.name}</h1>
@@ -42,7 +48,7 @@ export default function ItemPage(props) {
                 {/* Move item description directly below the image */}
                 <div className="item-details">
                     <h2>£{item.unitPrice}</h2>
-                    <h3>Seller: {item.manufacturer}</h3>
+                        <h3>Seller: {user?.userName || 'Unknown User'}</h3>
 
                     {/* Quantity Selector */}
                     <p>
@@ -51,10 +57,9 @@ export default function ItemPage(props) {
                     <input
                         type="number"
                         min="1"
-                        defaultValue="1"
-                        max={item.quantity}
-                        value={item.selectedQuantity}
-                        onChange={(e) => onQuantityChange(e.target.value)}
+                        default="1"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
                     />
 
                     {/* Buy Button */}
@@ -62,8 +67,9 @@ export default function ItemPage(props) {
                 </div>
             </div>
             <p className="item-description">{item.description}</p>
-        </div>
-    );
+            </div>
+        )
+    };
 
     const placeOrder = async (orderData) => {
         try {
@@ -88,66 +94,87 @@ export default function ItemPage(props) {
         }
     }
 
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch('https://localhost:7195/api/Users/GetUser'); // Replace with your API URL
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Fetched users:', data); // Print the user data to the console
+                setUsers(data);
+            } else {
+                console.error('Failed to fetch users.');
+            }
+        } catch (error) {
+            console.error('An error occurred while fetching users:', error);
+        }
+    }
+
 
 
     // Function to render a single item card
-    const renderCard = (item) => (
-        <div key={item.id} className="col-md-4">
-            {location.pathname !== `/example-products/${item.id}` ? (
-                // Display a link to the individual item page if not on the individual item page
-                <Link to={`/example-products/${item.id}`} className="card-link">
-                    <div className="card" style={{ width: '100%' }}>
-                        {/* Display item image at the top */}
-                        <img
-                            src={item.imageURL}
-                            alt={item.name}
-                            className="card-img-top custom-img-size"
-                        />
-                        <div className="card-body">
-                            {/* Display item details */}
-                            <h1 className="card-title">
-                                {item.name}  
-                            </h1>
-                            <h4 >
-                               £{item.unitPrice}
-                            </h4>
-                            Sold By:<br/>{item.manufacturer}
+    const renderCard = (item) => {
+
+        const user = users.find((user) => user.id === item.manufacturer);
+        console.log(users);
+
+        return (
+            <div key={item.id} className="col-md-4">
+                {location.pathname !== `/example-products/${item.id}` ? (
+                    // Display a link to the individual item page if not on the individual item page
+                    <Link to={`/example-products/${item.id}`} className="card-link">
+                        <div className="card" style={{ width: '100%' }}>
+                            {/* Display item image at the top */}
+                            <img
+                                src={item.imageURL}
+                                alt={item.name}
+                                className="card-img-top custom-img-size"
+                            />
+                            <div className="card-body">
+                                {/* Display item details */}
+                                <h1 className="card-title">
+                                    {item.name}
+                                </h1>
+                                <h4 >
+                                    £{item.unitPrice}
+                                </h4>
+                                Sold By:<br />{user ? user.userName : 'Unknown User'}
+                            </div>
                         </div>
-                    </div>
-                </Link>
-            ) : (
+                    </Link>
+                ) : (
                     // Display individual item page
                     <IndividualItemPage
                         item={item}
-                        onBuyClick={(quantity) => {
+
+                        onBuyClick={() => {
 
                             var today = new Date();
                             var date = today.toLocaleDateString();
 
                             let token = localStorage.getItem('accessToken');
                             let decodedToken = jwtDecode(token);
-                            let username = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+                            let customerId = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
 
 
                             const newOrderData = {
-                                id: 1,
-                                userId: username, //Change from username to userID as username will not always be unique........................................................
+                                userId: customerId, //Change from username to userID as username will not always be unique........................................................
                                 itemId: item.id,
-                                orderNumber: 1,
-                                orderDate: date.toString(), 
+                                orderNumber: quantity,
+                                orderDate: date.toString(),
                                 orderStatus: "0",
                             };
 
                             console.log(newOrderData)
 
                             placeOrder(newOrderData);
-                            
+
                             console.log(`Item ${quantity} ID ${item.id} bought!`);
                         }}
                     />
-            )}
-        </div>
-    );
+                )}
+            </div>
+        );
+    };
 
     // Render the item page
     return (

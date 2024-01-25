@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 //import { createBrowserHistory } from 'history';
 import { Link } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 /*export const browserHistory = createBrowserHistory();*/
 
@@ -12,6 +13,7 @@ export class DisplayItem extends Component {
         this.state = {
             loading: true,
             items: [], 
+            users: [],
             selectedItem: null,
             editedItem: null, // Store the currently edited item
             showForm: false,
@@ -34,8 +36,18 @@ export class DisplayItem extends Component {
     }
 
     async fetchItems() {
+
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            console.error('No access token found.');
+            return;
+        }
+
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+
         try {
-            const response = await fetch('https://localhost:7195/api/Item/GetItems'); // Replace with your API URL
+            const response = await fetch(`https://localhost:7195/api/Item/GetItemBySeller/${userId}`); // Replace with your API URL
             if (response.ok) {
                 const data = await response.json();
                 this.setState({ items: data, loading: false });
@@ -482,7 +494,7 @@ export class DisplayItem extends Component {
                                 </td>
                                 <td>{item.id}</td>
                                 <td>{item.name}</td>
-                                <td>{item.manufacturer}</td>
+                                <td>{item.manufacturer}</td> 
                                 <td>{item.unitPrice}</td>
                                 <td>{item.unitPrice}</td>
                                 <td>{item.discount}</td>

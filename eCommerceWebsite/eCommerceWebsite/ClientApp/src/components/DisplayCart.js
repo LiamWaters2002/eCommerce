@@ -7,8 +7,12 @@ export class DisplayCart extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            loading: true,
+            loadingOrders: true,
+            loadingItems: true,
+            loadingUsers: true,
             orders: [],
+            items: [],
+            users: [],
             selectedOrder: null,
             editedOrder: null, // Store the currently edited order
             showForm: false,
@@ -19,6 +23,23 @@ export class DisplayCart extends Component {
     // Run when the component is mounted onto the DOM.
     componentDidMount() {
         this.fetchOrders();
+        this.fetchItems();
+        this.fetchUsers();
+    }
+
+    async fetchUsers() {
+        try {
+            const response = await fetch('https://localhost:7195/api/Users/GetUser'); // Replace with your API URL
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Fetched users:', data); // Print the user data to the console
+                this.setState({ users: data, loadingUsers: false });
+            } else {
+                console.error('Failed to fetch users.');
+            }
+        } catch (error) {
+            console.error('An error occurred while fetching users:', error);
+        }
     }
 
     async fetchOrders() {
@@ -43,6 +64,21 @@ export class DisplayCart extends Component {
             }
         } catch (error) {
             console.error('An error occurred while fetching orders:', error);
+        }
+    }
+
+    async fetchItems() {
+        try {
+            const response = await fetch('https://localhost:7195/api/Item/GetItems')
+            if (response.ok) {
+                const data = await response.json();
+                this.setState({ items: data, loadingItems: false });
+            } else {
+                // Handle error here
+                console.error('Failed to fetch items.');
+            }
+        } catch (error) {
+            console.error('An error occurred while fetching items:', error);
         }
     }
 
@@ -197,10 +233,11 @@ export class DisplayCart extends Component {
     render() {
         let contents;
 
-        if (this.state.loading) {
+        if (this.state.loadingOrders && this.state.loadingItems && this.state.loadingUsers) {
             contents = <p><em>Loading...</em></p>;
         } else {
-            contents = this.renderOrdersTable(this.state.orders);
+            console.log(this.state.items)
+            contents = this.renderOrdersTable(this.state.orders, this.state.items, this.state.users);
         }
 
         let formOrEditOrder;
@@ -369,21 +406,9 @@ export class DisplayCart extends Component {
 
         return (
             <div>
-                <h1 id="tableLabel">Orders</h1>
+                <h1 id="tableLabel">Your Basket</h1>
                 <p>This component demonstrates fetching data from the server.</p>
                 {contents}
-
-                <button onClick={this.toggleForm}>
-                    {this.state.showForm ? <b>Add A New Order</b> : 'Add A New Order'}
-                </button>
-
-                <button onClick={this.toggleEdit} disabled={!this.state.selectedOrder}>
-                    {this.state.selectedOrder ? (
-                        this.state.editOrderMode ? <b>Edit Selected Order</b> : 'Edit Selected Order'
-                    ) : (
-                        'Edit Selected Order'
-                    )}
-                </button>
 
                 <button onClick={this.deleteOrder} disabled={!this.state.selectedOrder}>
                     Delete Selected Order
@@ -394,8 +419,8 @@ export class DisplayCart extends Component {
         );
     }
 
-    renderOrdersTable(orders) {
-        const { selectedOrder, editedOrder } = this.state;
+    renderOrdersTable(orders, items, users) {
+        const { selectedOrder } = this.state;
 
         return (
             <div>
@@ -403,31 +428,53 @@ export class DisplayCart extends Component {
                     <thead>
                         <tr>
                             <th>Select</th>
-                            <th>UserID</th>
-                            <th>ItemId</th>
-                            <th>OrderNumber</th>
-                            <th>OrderDate</th>
-                            <th>OrderStatus</th>
+{/*                            <th>Customer</th>*/}
+                            <th>Order Date</th>
+                            <th>Item Name</th>
+                            <th>Quantity of Item</th>
+                            <th>Item Image</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.map(order => (
-                            <tr key={order.id}>
-                                <td>
-                                    <input
-                                        type="radio"
-                                        name={`orderRadio_${order.id}`}
-                                        onChange={(event) => this.handleRadioChange(event, order)}
-                                        checked={selectedOrder && selectedOrder.id === order.id}
-                                    />
-                                </td>
-                                <td>{order.userId}</td>
-                                <td>{order.itemId}</td>
-                                <td>{order.orderNumber}</td>
-                                <td>{order.orderDate}</td>
-                                <td>{order.orderStatus}</td>
-                            </tr>
-                        ))}
+                        {orders.map(order => {
+
+                            let customer = users.find(user => user.id === order.userId);
+                            console.log(users);
+                            console.log(orders);
+/*                            let customerName = "";*/
+                            let selectedItem = items.find(item => item.id === order.itemId);
+                            let imageUrl = "https://cdn.iconscout.com/icon/free/png-256/free-question-mark-1768084-1502257.png";
+                            let name = "";
+
+                            if (selectedItem) {
+                                imageUrl = selectedItem.imageURL;
+                                name = selectedItem.name;
+                                console.log(selectedItem);
+                            }
+                            //if (customer) {
+                            //    customerName = customer.userName;
+                            //}
+
+                            return (
+                                <tr key={order.id}>
+                                    <td>
+                                        <input
+                                            type="radio"
+                                            name={`orderRadio_${order.id}`}
+                                            onChange={(event) => this.handleRadioChange(event, order)}
+                                            checked={selectedOrder && selectedOrder.id === order.id}
+                                        />
+                                    </td>
+{/*                                    <td>{customerName}</td>*/}
+                                    <td>{order.orderDate}</td>
+                                    <td>{name}</td>
+                                    <td>{order.orderNumber}</td>
+                                    <td>
+                                        <img src={imageUrl} alt={`Image for ${order.itemId}`} style={{ maxWidth: '100px' }} />
+                                    </td>
+                                </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
             </div>

@@ -36,6 +36,20 @@ namespace eCommerceWebsite.Controllers
             return Ok(item);
         }
 
+
+        [HttpGet]
+        [Route("GetItemBySeller/{id}")]
+        public async Task<IActionResult> GetItemBySeller(string id)
+        {
+            var items = await itemDBContext.Items.Where(item => item.Manufacturer == id).ToListAsync();
+            if (items == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(items);
+        }
+
         [HttpPost]
         [Route("AddItem")]
         public async Task<Items> AddItem(Items item)
